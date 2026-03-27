@@ -1,0 +1,19 @@
+{
+  "name": "genesis-tower-reversion-miner",
+  "version": "1.0.0",
+  "description": "WD-043 — Tower Reversion Miner: Microstructure Fingerprint → Reversion Tail Harvester (Spark #008 Remora)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
