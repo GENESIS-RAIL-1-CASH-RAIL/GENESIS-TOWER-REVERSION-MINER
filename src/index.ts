@@ -10,6 +10,7 @@ import { FingerprintWatcherService } from "./services/fingerprint-watcher.servic
 import { ReversionEvaluatorService } from "./services/reversion-evaluator.service";
 import { SignalEmitterService } from "./services/signal-emitter.service";
 import { WeaponRegistryService } from "./services/weapon-registry.service";
+import { ProbabilisticFingerprintService } from "./services/probabilistic-fingerprint.service";
 import {
   HealthResponse,
   MinerStats,
@@ -27,6 +28,8 @@ const startTime = Date.now();
 const watcher = new FingerprintWatcherService();
 const evaluator = new ReversionEvaluatorService();
 const emitter = new SignalEmitterService();
+const probFingerprint = new ProbabilisticFingerprintService();
+
 const registry = new WeaponRegistryService({
   weaponId: "WD-043",
   service: "GENESIS-TOWER-REVERSION-MINER",
@@ -34,7 +37,7 @@ const registry = new WeaponRegistryService({
   deploymentClass: "STRIKE",
   purpose:
     "Tower Remora: reads microstructure fingerprints (quote-skew + amendment cadence) and harvests reversion tails Tower triggers but does not stay to collect.",
-  endpoints: 19,
+  endpoints: 20,
   loops: 3,
   spark: "#008 Remora",
   academicBasis:
@@ -219,7 +222,7 @@ app.get("/health", (_req, res) => {
   const stats = aggregateStats();
   const response: HealthResponse = {
     service: "GENESIS-TOWER-REVERSION-MINER",
-    version: "1.0.0",
+    version: "10.0.0",
     port: PORT,
     status:
       stats.activePatternsCount > 5
@@ -419,6 +422,18 @@ app.get("/register", (_req, res) => {
   res.json(registry.getStatus());
 });
 
+// ─── v10.0 POLISH ENDPOINT ──────────────────────────────────────────────────
+
+/** GET /fingerprint/probabilistic — Probabilistic fingerprint service state */
+app.get("/fingerprint/probabilistic", (_req, res) => {
+  res.json({
+    state: probFingerprint.getState(),
+    recentMatches: probFingerprint.getRecentMatches(20),
+    recentEntryDecisions: probFingerprint.getRecentEntryDecisions(20),
+    timestamp: Date.now(),
+  });
+});
+
 app.post("/intel", (req, res) => {
   const signal = req.body;
   console.log(`[INTEL] Received: ${signal?.type} from ${signal?.source}`);
@@ -446,7 +461,7 @@ app.listen(PORT, () => {
   console.log("  Microstructure Fingerprint → Reversion Tail Harvester");
   console.log("  Spark #008 — Remora Doctrine (Tower Research Capital)");
   console.log(`  Port: ${PORT}`);
-  console.log("  Endpoints: 19 (health 4, fingerprint 4, reversion 4, execution 4, registration 3)");
+  console.log("  Endpoints: 20 (health 4, fingerprint 4, reversion 4, execution 4, registration 3, v10 1)");
   console.log("  Loops: 3 (fingerprint 5s, reversion 5s, broadcast 30s)");
   console.log("  Deployment Class: STRIKE");
   console.log("═══════════════════════════════════════════════════════════");
